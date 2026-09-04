@@ -1,1 +1,97 @@
+==================================================
+PUNTO 1: ANÁLISIS TCP HANDSHAKE (www.cs.umss.edu.bo)
+==================================================
+
+[PROMPT USADO CON LA IA CHATGPT]
+"Oye, capturé estos dos paquetes en wreshark al intentar abrir la página de la UMSS: el Frame 543 (SYN) y el Frame 560 (ACK), ayudame a entender qué significa cada dato de la cabecera TCP de forma sencilla."
+
+[ENCABEZADOS DE WIRESHARK]
+- Frame 543 (SYN):
+  Source Port: 55487
+  Destination Port: 80
+  Sequence Number (raw): 3784028970 (Seq relativo: 0)
+  Acknowledgment Number: 0
+  Header Length: 32 bytes
+  Flags: 0x002 (Syn: Set)
+  Window: 65535
+
+- Frame 560 (ACK):
+  Source Port: 55487
+  Destination Port: 80
+  Sequence Number (raw): 3784028971 (Seq relativo: 1)
+  Acknowledgment Number (raw): 638031465 (Ack relativo: 1)
+  Header Length: 20 bytes
+  Flags: 0x010 (Acknowledgment: Set)
+
+EXPLICACIÓN
+En esta parte analicé cómo mi computadora se conecta con el servidor de la UMSS usando el saludo de 3 pasos de TCP:
+
+1. Frame 543 (SYN):
+   Es el primer mensaje que manda mi compu para pedir conectarse. 
+   - Abre un puerto temporal propio (55487) y apunta al puerto 80 del servidor, que es el de páginas web.
+   - Tiene la bandera SYN activada en 1, que básicamente sirve para decirle al servidor "hola, quiero sincronizarme contigo".
+   - Pone un número de secuencia al azar para empezar la conversación y el ACK está en 0 porque todavía no estamos respondiendo a nada.
+   - Mide 32 bytes porque incluye opciones de configuración iniciales.
+
+2. Frame 560 (ACK):
+   Es el tercer paso del saludo, después de que el servidor ya me contestó.
+   - Mi compu responde con la bandera ACK en 1 para confirmar que sí recibió la respuesta del servidor.
+   - El número de secuencia aumentó en 1 y en el campo Acknowledgment Number le sumamos 1 al número que nos mandó el servidor, para avisarle que todo llegó bien.
+   - Con esto la conexión queda lista para empezar a cargar la página.
+
+
+==================================================
+PUNTO 2: ANÁLISIS CABECERA UDP / DNS (www.google.com)
+==================================================
+
+[PROMPT USADO CON LA IA CHATGPT]
+"Ayúdame a entender de forma fácil qué significan los campos de la cabecera UDP de este paquete (Frame 85) que capturé cuando mi compu hizo la consulta DNS para entrar a google.com."
+
+[ENCABEZADOS DE WIRESHARK]
+- Frame 85 (User Datagram Protocol):
+  Source Port: 65499
+  Destination Port: 53
+  Length: 40 bytes
+  Checksum: 0xdda3
+  UDP payload: 32 bytes (Domain Name System query)
+
+EXPLICACIÓN
+Aquí analicé la pregunta que hace mi máquina para saber la IP de www.google.com:
+
+1. A diferencia de TCP, aquí se usa UDP porque para una consulta de DNS no hace falta hacer todo el proceso de saludo ni pedir confirmaciones; lo que importa es que sea rápido.
+2. Mi computadora usó un puerto propio al azar (65499) y mandó la pregunta al puerto 53, que es el puerto que usan los servidores DNS.
+3. El paquete completo mide 40 bytes (8 bytes son los datos fijos de la cabecera de UDP y los otros 32 bytes son la pregunta sobre Google).
+4. También tiene un Checksum que sirve para revisar que el paquete no haya llegado dañado.
+
+==================================================
+PUNTO 3: ANÁLISIS CABECERA RTP (rtp_example.raw)
+==================================================
+PROMPT USADO CON LA IA CHATGPT
+"Copié la cabecera RTP del Frame 34 del archivo rtp_example.raw en wireshark, ayúdame a entender qué significa cada campo (Payload type, Sequence number, Timestamp, SSRC y Marker) con una explicación sencilla como para principiante."
+
+[ENCABEZADOS DE WIRESHARK]
+- Frame 34 (Real-Time Transport Protocol):
+  Internet Protocol Version 4: Src 10.1.3.143 -> Dst 10.1.6.18
+  User Datagram Protocol: Src Port 5000 -> Dst Port 2006
+  Version: RFC 1889 Version (2)
+  Marker: True
+  Payload type: ITU-T G.711 PCMA (8)
+  Sequence number: 59133
+  Timestamp: 240
+  Synchronization Source identifier (SSRC): 0xdee0ee8f (3739283087)
+
+EXPLICACIÓN 
+En este último punto analicé cómo viaja un paquete de audio en tiempo real usando el protocolo RTP por encima de UDP:
+
+1. ¿Por qué se usa RTP?:
+   UDP manda los paquetes rápido pero no le importa el orden ni si se pierden. Por eso se le monta encima RTP, que agrega los datos necesarios para que el audio se pueda escuchar continuo y sin saltos raros.
+
+2. Campos analizados del Frame 34:
+   - Puertos UDP (5000 a 2006): La transmisión de audio se realiza entre estos dos puertos usando datagramas rápidos.
+   - Version (2): Indica que usa la versión estándar actual de RTP.
+   - Marker (True): Está activado para avisar que aquí empieza una ráfaga de voz o el inicio del audio.
+   - Payload type (G.711 PCMA): Es el formato o códec con el que se digitalizó la voz (un formato clásico de telefonía).
+   - Sequence number (59133): Es el número de este paquete de voz. Como los paquetes siguientes van subiendo de uno en uno (59134, 59135...), mi reproductor puede saber si un paquete llegó desordenado o si se cayó en la red.
+   - Timestamp (240): Es una marca de tiempo que indica el momento exacto en que se grabó este pedacito de sonido, para que quien lo reciba lo reproduzca a la velocidad correcta y sin pausas.
+   - SSRC (0xdee0ee8f): Es el código identificador de la fuente (sirve para saber qué persona o dispositivo específico está enviando ese audio).
 
