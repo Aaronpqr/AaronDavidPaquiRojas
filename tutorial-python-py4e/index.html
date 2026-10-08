@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial Interactivo de Python - PY4E</title>
+    <!-- Framework CSS: W3.CSS (CDN oficial) -->
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <!-- Estilos complementarios -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Menú de Navegación Lateral -->
+    <nav class="w3-sidebar w3-bar-block w3-card w3-animate-left" id="mySidebar">
+        <!-- Botón para cerrar en móvil -->
+        <button class="w3-bar-item w3-button w3-hide-large w3-large w3-right-align" id="closeMenuBtn">Cerrar &times;</button>
+        
+        <div class="w3-container w3-padding-16 py-header">
+            <h4><b>Temario PY4E</b></h4>
+        </div>
+        
+        <a href="#home" class="w3-bar-item w3-button w3-padding w3-hover-blue">Inicio</a>
+        <a href="#intro" class="w3-bar-item w3-button w3-padding w3-hover-blue">1. Introducción</a>
+        <a href="#variables" class="w3-bar-item w3-button w3-padding w3-hover-blue">2. Variables y Tipos</a>
+        <a href="#condicionales" class="w3-bar-item w3-button w3-padding w3-hover-blue">3. Condicionales</a>
+        <a href="#funciones" class="w3-bar-item w3-button w3-padding w3-hover-blue">4. Funciones</a>
+        <a href="#bucles" class="w3-bar-item w3-button w3-padding w3-hover-blue">5. Bucles</a>
+        <a href="#creditos" class="w3-bar-item w3-button w3-padding w3-hover-blue">Créditos</a>
+    </nav>
+
+    <!-- Contenedor Principal -->
+    <div class="main-content">
+        
+        <!-- Hero Header -->
+        <header class="w3-container py-header w3-center" style="padding: 64px 16px;" id="home">
+            <!-- Botón hamburguesa (oculto en escritorio) -->
+            <button class="w3-button py-header w3-xlarge w3-left w3-hide-large" id="openMenuBtn">&#9776;</button>
+            <h1 class="w3-jumbo w3-animate-top"><b>Python para Todos</b></h1>
+            <p class="w3-xlarge">Una introducción a la programación para todo el mundo.</p>
+        </header>
+
+        <!-- Envoltorio del contenido para limitar el ancho en escritorio -->
+        <div class="w3-container w3-padding-32 content-wrapper">
+            
+            <!-- 1. Introducción y el Primer Programa -->
+            <section id="intro" class="section-card w3-animate-bottom">
+                <h2 class="w3-text-blue">1. Introducción y el Primer Programa</h2>
+                <p>Python es un lenguaje de programación muy poderoso y fácil de aprender. El Dr. Charles Severance (Dr. Chuck) nos anima a ver la programación como la forma en que "hablamos" con la computadora.</p>
+                <p>El primer programa que se suele escribir para aprender un nuevo lenguaje es "Hola Mundo". En Python, usamos la función nativa <code>print()</code>.</p>
+                
+                <div class="code-container">
+                    <button class="copy-btn">Copiar código</button>
+                    <pre><code>print("¡Hola Mundo!")
+print("Bienvenidos al curso de Python for Everybody.")</code></pre>
+                </div>
+            </section>
+
+            <!-- 2. Variables, tipos de datos y tabla comparativa -->
+            <section id="variables" class="section-card w3-animate-bottom">
+                <h2 class="w3-text-blue">2. Variables y Tipos de Datos</h2>
+                <p>Una variable es un lugar con nombre en la memoria principal de la computadora donde puedes almacenar datos para usarlos más adelante.</p>
+                
+                <h4 class="w3-margin-top">Tabla Comparativa de Tipos</h4>
+                <div class="w3-responsive">
+                    <table class="w3-table-all w3-hoverable">
+                        <thead>
+                            <tr class="py-header">
+                                <th>Tipo de Dato</th>
+                                <th>Descripción</th>
+                                <th>Ejemplo Python</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Entero (int)</strong></td>
+                                <td>Números sin parte fraccionaria.</td>
+                                <td><code>edad = 25</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Flotante (float)</strong></td>
+                                <td>Números con valores decimales.</td>
+                                <td><code>tarifa = 10.50</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Cadena (str)</strong></td>
+                                <td>Secuencias de caracteres (texto).</td>
+                                <td><code>nombre = "Chuck"</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Booleano (bool)</strong></td>
+                                <td>Valores lógicos (Verdadero/Falso).</td>
+                                <td><code>es_profesor = True</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="code-container w3-margin-top">
+                    <button class="copy-btn">Copiar código</button>
+                    <pre><code># Definiendo variables de distintos tipos
+curso = "PY4E"
+horas = 12
+precio = 0.0
+
+print(curso, "dura", horas, "horas.")</code></pre>
+                </div>
+            </section>
+
+            <!-- 3. Estructuras condicionales (if / else) con cálculo de horas extras -->
+            <section id="condicionales" class="section-card w3-animate-bottom">
+                <h2 class="w3-text-blue">3. Estructuras Condicionales</h2>
+                <p>Los programas pueden tomar decisiones. Un ejercicio clásico de PY4E es calcular el pago de un trabajador que incluye horas extras.</p>
+                <p>Si trabaja más de 40 horas, recibe un pago 1.5 veces mayor a la tarifa habitual por esas horas adicionales.</p>
+                
+                <div class="code-container">
+                    <button class="copy-btn">Copiar código</button>
+                    <pre><code>horas = 45
+tarifa = 10.0
+
+if horas > 40:
+    pago_regular = 40 * tarifa
+    pago_extra = (horas - 40) * (tarifa * 1.5)
+    pago_total = pago_regular + pago_extra
+else:
+    pago_total = horas * tarifa
+
+print("El pago total es:", pago_total)</code></pre>
+                </div>
+            </section>
+
+            <!-- 4. Funciones (def y return) -->
+            <section id="funciones" class="section-card w3-animate-bottom">
+                <h2 class="w3-text-blue">4. Funciones (def y return)</h2>
+                <p>Para evitar repetir código y hacerlo más organizado, agrupamos bloques de instrucciones en funciones mediante la palabra clave <code>def</code>. Las funciones pueden devolver un resultado utilizando <code>return</code>.</p>
+                
+                <div class="code-container">
+                    <button class="copy-btn">Copiar código</button>
+                    <pre><code>def calcular_pago(horas, tarifa):
+    if horas > 40:
+        reg = 40 * tarifa
+        ext = (horas - 40) * (tarifa * 1.5)
+        total = reg + ext
+    else:
+        total = horas * tarifa
+    return total
+
+salario_juan = calcular_pago(45, 10.0)
+print("Salario calculado desde función:", salario_juan)</code></pre>
+                </div>
+            </section>
+
+            <!-- 5. Bucles e iteraciones (for y listas) -->
+            <section id="bucles" class="section-card w3-animate-bottom">
+                <h2 class="w3-text-blue">5. Bucles e Iteraciones</h2>
+                <p>Los bucles nos permiten repetir tareas sobre conjuntos de datos. El bucle <code>for</code> se usa habitualmente para recorrer los elementos de una lista.</p>
+                
+                <div class="code-container">
+                    <button class="copy-btn">Copiar código</button>
+                    <pre><code>nombres = ['Joseph', 'Glenn', 'Sally']
+
+for amigo in nombres:
+    print("Feliz Año Nuevo:", amigo)
+print("¡Iteración completada!\n")
+
+# Buscar el número mayor en una lista
+mayor_encontrado = -1
+for numero in [9, 41, 12, 3, 74, 15]:
+    if numero > mayor_encontrado:
+        mayor_encontrado = numero
+print("El número mayor es:", mayor_encontrado)</code></pre>
+                </div>
+            </section>
+
+            <!-- Sección Final de Créditos -->
+            <section id="creditos" class="section-card w3-animate-bottom">
+                <h2 class="w3-text-blue">Créditos y Referencia Oficial</h2>
+                <div class="w3-panel w3-leftbar w3-light-grey w3-padding-16">
+                    <p><i>"El propósito principal de este libro (y curso) es enseñar a todos, sin importar su perfil, cómo programar."</i></p>
+                    <p>— <b>Dr. Charles R. Severance</b></p>
+                </div>
+                <p>Este tutorial web interactivo está basado y rinde tributo al curso <strong>Python for Everybody (PY4E)</strong>.</p>
+                <p>Materiales originales, libro y curso completo disponibles gratuitamente en la web oficial: <br>
+                   <a href="https://www.py4e.com" target="_blank" class="w3-text-blue" style="text-decoration: none;"><b>www.py4e.com</b></a>
+                </p>
+            </section>
+
+        </div>
+        
+        <footer class="w3-container w3-center py-header w3-padding-32">
+            <p>Desarrollado con ❤️ para estudiantes de programación.</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
