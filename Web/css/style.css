@@ -1,0 +1,481 @@
+/* ==========================================================================
+   WebSlides - Estilos Principales
+   Complemento para W3.CSS enfocado en el editor de diapositivas y lienzo
+   ========================================================================== */
+
+:root {
+    --primary-color: #2196F3;
+    --primary-dark: #1976D2;
+    --bg-workspace: #eef2f5;
+    --canvas-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+body {
+    background-color: var(--bg-workspace);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Contenedor principal de la aplicación en 3 columnas */
+.app-container {
+    display: flex;
+    height: calc(100vh - 54px);
+    overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   Panel Izquierdo: Lista de Diapositivas (0, 1, 2...)
+   -------------------------------------------------------------------------- */
+.slides-sidebar {
+    width: 210px;
+    min-width: 210px;
+    background-color: #ffffff;
+    border-right: 1px solid #ddd;
+    overflow-y: auto;
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.slide-thumbnail-card {
+    position: relative;
+    cursor: pointer;
+    border-radius: 6px;
+    border: 2px solid transparent;
+    padding: 4px;
+    transition: all 0.2s ease;
+    background: #f8f9fa;
+}
+
+.slide-thumbnail-card:hover {
+    border-color: #bbdefb;
+    transform: translateY(-1px);
+}
+
+.slide-thumbnail-card.active {
+    border-color: var(--primary-color);
+    background-color: #e3f2fd;
+    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.25);
+}
+
+.slide-thumbnail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 4px;
+    padding: 0 4px;
+}
+
+/* Vista previa miniatura de la diapositiva */
+.slide-thumbnail-preview {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 4px;
+    overflow: hidden;
+    font-size: 8px;
+    line-height: 1.1;
+    pointer-events: none;
+    box-sizing: border-box;
+}
+
+.slide-thumbnail-preview.standard {
+    aspect-ratio: 4 / 3;
+}
+
+.thumbnail-title {
+    font-weight: bold;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.thumbnail-snippet {
+    color: #777;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --------------------------------------------------------------------------
+   Área Central: Lienzo de Edición (Slide Canvas)
+   -------------------------------------------------------------------------- */
+.canvas-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    overflow: auto;
+    position: relative;
+}
+
+/* El contenedor de la diapositiva que replica el dibujo de la pizarra */
+.slide-frame {
+    position: relative;
+    background-color: #ffffff;
+    box-shadow: var(--canvas-shadow);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    padding: 30px 40px;
+    transition: width 0.3s ease, height 0.3s ease, background-color 0.3s ease;
+    overflow: hidden;
+    color: #222;
+}
+
+/* Proporciones de diapositiva indicadas en pizarra: wide (16:9) / standard (4:3) */
+.slide-frame.format-wide {
+    width: min(850px, 90%);
+    aspect-ratio: 16 / 9;
+}
+
+.slide-frame.format-standard {
+    width: min(720px, 90%);
+    aspect-ratio: 4 / 3;
+}
+
+/* Cabecera (head) - Indicada con línea punteada en la pizarra */
+.slide-head {
+    border: 1px dashed #bbb;
+    border-radius: 4px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #666;
+    transition: border-color 0.2s;
+    min-height: 28px;
+    outline: none;
+}
+
+.slide-head:focus,
+.slide-head:hover {
+    border-color: var(--primary-color);
+}
+
+.slide-head:empty:before {
+    content: "Encabezado (head) - haz clic para editar";
+    color: #aaa;
+    font-style: italic;
+}
+
+/* Contenido Principal (Cuerpo central del slide) */
+.slide-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    outline: none;
+    overflow-y: auto;
+    padding: 10px 0;
+}
+
+.slide-body:focus {
+    outline: 1px solid rgba(33, 150, 243, 0.3);
+    border-radius: 4px;
+}
+
+/* Estilos de texto dentro del cuerpo */
+.slide-title {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    outline: none;
+}
+
+.slide-title:empty:before {
+    content: "Título de la diapositiva";
+    color: #aaa;
+}
+
+.slide-content-text {
+    font-size: 17px;
+    line-height: 1.5;
+    outline: none;
+    min-height: 80px;
+}
+
+.slide-content-text:empty:before {
+    content: "Haz clic aquí para escribir el contenido o puntos clave...";
+    color: #aaa;
+}
+
+/* Diseño específico para Diapositiva 0 (Slide 0: Portada / Título) */
+.slide-frame.is-slide-0 .slide-body {
+    align-items: center;
+    text-align: center;
+}
+
+.slide-frame.is-slide-0 .slide-title {
+    font-size: 34px;
+    margin-bottom: 16px;
+}
+
+.slide-frame.is-slide-0 .slide-content-text {
+    font-size: 20px;
+    color: #555;
+    max-width: 80%;
+}
+
+.slide-frame.is-slide-0 .slide-content-text:empty:before {
+    content: "Subtítulo o autor de la presentación";
+}
+
+/* Pie de página (foot) y Numeración - Indicado con línea punteada en la pizarra */
+.slide-footer-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.slide-foot {
+    flex: 1;
+    border: 1px dashed #bbb;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: #666;
+    outline: none;
+    min-height: 26px;
+}
+
+.slide-foot:focus,
+.slide-foot:hover {
+    border-color: var(--primary-color);
+}
+
+.slide-foot:empty:before {
+    content: "Pie de página (foot) - haz clic para editar";
+    color: #aaa;
+    font-style: italic;
+}
+
+/* Numeración de diapositivas con alineación como se describe en la pizarra */
+.slide-numbering {
+    font-size: 12px;
+    font-weight: 600;
+    color: #777;
+    white-space: nowrap;
+    padding: 2px 6px;
+}
+
+/* --------------------------------------------------------------------------
+   Panel Derecho: Estilo por Defecto y Opciones de Diapositiva
+   -------------------------------------------------------------------------- */
+.config-sidebar {
+    width: 310px;
+    min-width: 310px;
+    background-color: #ffffff;
+    border-left: 1px solid #ddd;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+.config-section {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #eee;
+}
+
+.config-section:last-child {
+    border-bottom: none;
+}
+
+.config-label {
+    font-weight: 600;
+    font-size: 13px;
+    color: #333;
+    margin-bottom: 6px;
+    display: block;
+}
+
+/* Paleta de colores para selección rápida de background */
+.color-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.color-swatch {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s;
+}
+
+.color-swatch:hover {
+    transform: scale(1.15);
+    border-color: #000;
+}
+
+.color-swatch.active {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.4);
+}
+
+/* --------------------------------------------------------------------------
+   Modo Presentación (Pantalla Completa)
+   -------------------------------------------------------------------------- */
+.presentation-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #000000;
+    z-index: 99999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    cursor: default;
+}
+
+.presentation-overlay.active {
+    display: flex;
+}
+
+/* El contenedor abarca toda la pantalla */
+.presentation-slide-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+    background-color: #000;
+}
+
+/* En modo presentación, la diapositiva abarca toda la pantalla */
+.presentation-overlay .slide-frame {
+    border-radius: 0;
+    box-shadow: none;
+    padding: 5vh 6vw;
+    transition: none;
+    box-sizing: border-box;
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+}
+
+/* Opcional: Si se quiere mantener la proporción matemática exacta de 16:9 o 4:3 en pantallas no panorámicas */
+.presentation-overlay .slide-frame.format-wide {
+    width: 100vw;
+    height: 100vh;
+}
+
+.presentation-overlay .slide-frame.format-standard {
+    width: 100vw;
+    height: 100vh;
+}
+
+/* Ocultar bordes de edición en presentación */
+.presentation-overlay .slide-head,
+.presentation-overlay .slide-foot {
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+}
+
+/* Tipografía escalada para presentación a pantalla completa */
+.presentation-overlay .slide-head {
+    font-size: clamp(16px, 2.4vh, 26px);
+    margin-bottom: 2vh;
+    min-height: auto;
+}
+
+.presentation-overlay .slide-title {
+    font-size: clamp(32px, 5.5vh, 64px);
+    margin-bottom: 3vh;
+    line-height: 1.2;
+}
+
+.presentation-overlay .slide-content-text {
+    font-size: clamp(20px, 3.2vh, 38px);
+    line-height: 1.6;
+}
+
+.presentation-overlay .slide-foot,
+.presentation-overlay .slide-numbering {
+    font-size: clamp(15px, 2.2vh, 24px);
+    padding: 0;
+}
+
+.presentation-overlay .slide-footer-wrapper {
+    margin-top: 3vh;
+}
+
+/* Diapositiva 0 (Portada) en modo presentación */
+.presentation-overlay .slide-frame.is-slide-0 .slide-title {
+    font-size: clamp(42px, 7.5vh, 84px);
+    margin-bottom: 3vh;
+}
+
+.presentation-overlay .slide-frame.is-slide-0 .slide-content-text {
+    font-size: clamp(24px, 4.2vh, 48px);
+    max-width: 85%;
+}
+
+/* Barra de controles flotante discreta */
+.presentation-controls {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    padding: 8px 18px;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 100000;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* Al mover el mouse sobre la pantalla se hacen visibles los controles */
+.presentation-overlay:hover .presentation-controls,
+.presentation-controls:hover {
+    opacity: 1;
+}
+
+/* Indicador de guardado */
+#saveStatus {
+    font-size: 12px;
+    transition: all 0.3s;
+}
+
+/* Barra de herramientas de texto */
+.formatting-toolbar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 12px;
+    background: #fff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
