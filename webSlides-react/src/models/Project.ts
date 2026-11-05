@@ -1,4 +1,4 @@
-import { Slide } from './Slide';
+import type { Slide } from './Slide';
 
 export interface Project {
   id: string;
