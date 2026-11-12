@@ -1,122 +1,71 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useProjectController } from '../controllers/useProjectController';
+import { useSlideController } from '../controllers/useSlideController';
+import { IndexedDbProjectRepository } from '../infrastructure/IndexedDbProjectRepository';
+import type { IProjectRepository } from '../models/ports/IProjectRepository';
+import { formatDate } from '../utils/formatDate';
+import { EditorView } from './containers/EditorView';
+import { PresentationView } from './containers/PresentationView';
+import { ProjectListView } from './containers/ProjectListView';
 
-function App() {
-  const [count, setCount] = useState(0)
+// Raíz de composición: único lugar que conoce la implementación concreta.
+// Para migrar a microservicios REST, basta cambiar esta línea por
+// new HttpMicroserviceRepository(...). El constructor no abre la BD (es perezoso).
+const defaultRepository: IProjectRepository = new IndexedDbProjectRepository();
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+interface AppProps {
+  repository?: IProjectRepository;
 }
 
-export default App
+export default function App({ repository = defaultRepository }: AppProps) {
+  const projectCtl = useProjectController(repository);
+  const { currentProject } = projectCtl;
+  const slideCtl = useSlideController({
+    project: currentProject,
+    saveProject: projectCtl.saveProject,
+  });
+  const { activeSlide } = slideCtl;
+
+  if (currentProject && activeSlide && slideCtl.isPresentation) {
+    return (
+      <PresentationView
+        slide={activeSlide}
+        index={slideCtl.activeIndex}
+        total={slideCtl.slides.length}
+        author={currentProject.author}
+        topic={currentProject.topic}
+        date={formatDate(currentProject.createdAt)}
+        onNext={slideCtl.nextSlide}
+        onPrev={slideCtl.prevSlide}
+        onExit={slideCtl.stopPresentation}
+      />
+    );
+  }
+
+  if (currentProject && activeSlide) {
+    return (
+      <EditorView
+        project={currentProject}
+        slides={slideCtl.slides}
+        activeSlide={activeSlide}
+        activeIndex={slideCtl.activeIndex}
+        onSelectSlide={slideCtl.selectSlide}
+        onAddSlide={slideCtl.addSlide}
+        onUpdateSlide={slideCtl.updateSlide}
+        onDeleteSlide={slideCtl.deleteSlide}
+        onPresent={slideCtl.startPresentation}
+        onBack={() => projectCtl.selectProject(null)}
+      />
+    );
+  }
+
+  return (
+    <ProjectListView
+      projects={projectCtl.projects}
+      loading={projectCtl.loading}
+      error={projectCtl.error}
+      onCreate={projectCtl.createProject}
+      onOpen={projectCtl.selectProject}
+      onDelete={projectCtl.deleteProject}
+    />
+  );
+}
