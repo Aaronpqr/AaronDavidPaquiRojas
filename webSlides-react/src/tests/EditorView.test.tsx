@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/jest-globals';
 import { describe, expect, it, jest } from '@jest/globals';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { Slide } from '../models/Slide';
 import { EditorView, type EditorViewProps } from '../views/containers/EditorView';
@@ -181,5 +181,203 @@ describe('EditorView', () => {
     await user.type(name, 'Otro nombre{Enter}');
 
     expect(props.onUpdateProject).toHaveBeenCalledWith({ name: 'Otro nombre' });
+  });
+
+  it('subir una imagen local la convierte a Base64, actualiza la vista previa y guarda al instante', async () => {
+    const user = userEvent.setup();
+    const imageSlide: Slide = {
+      ...contentSlide,
+      layout: 'image-only',
+    };
+    const props = renderEditor({ activeSlide: imageSlide });
+
+    expect(screen.queryByRole('button', { name: 'Quitar imagen' })).toBeNull();
+
+    const fileInput = screen.getByLabelText('Seleccionar imagen desde el equipo') as HTMLInputElement;
+    expect(fileInput).toHaveAttribute('type', 'file');
+    expect(fileInput).toHaveAttribute('accept', 'image/*');
+
+    const clickSpy = jest.spyOn(fileInput, 'click');
+    await user.click(screen.getByRole('button', { name: 'Subir imagen desde el equipo' }));
+    expect(clickSpy).toHaveBeenCalledTimes(1);
+    clickSpy.mockRestore();
+
+    const file = new File(['contenido-png'], 'foto.png', { type: 'image/png' });
+    await user.upload(fileInput, file);
+
+    await waitFor(() => {
+      expect(props.onUpdateSlide).toHaveBeenCalledWith(
+        's2',
+        expect.objectContaining({
+          layout: 'image-only',
+          imageUrl: expect.stringMatching(/^data:image\/png;base64,/),
+          imageTransform: { x: 8, y: 20, width: 84, height: 74 },
+        }),
+      );
+    });
+
+    const img = within(preview()).getByRole('img');
+    expect(img.getAttribute('src')).toMatch(/^data:image\/png;base64,/);
+    expect(screen.getByRole('button', { name: 'Quitar imagen' })).toBeInTheDocument();
+  });
+
+  it('al pulsar "Quitar imagen" limpia la imagen de la vista previa y guarda el cambio', async () => {
+    const user = userEvent.setup();
+    const imageSlide: Slide = {
+      ...contentSlide,
+      layout: 'text-and-image',
+      imageUrl: 'https://example.com/foto.png',
+      imageTransform: { x: 52, y: 20, width: 43, height: 74 },
+    };
+    const props = renderEditor({ activeSlide: imageSlide });
+
+    expect(within(preview()).getByRole('img')).toHaveAttribute('src', 'https://example.com/foto.png');
+    expect(screen.getByLabelText('URL de la imagen')).toHaveValue('https://example.com/foto.png');
+
+    await user.click(screen.getByRole('button', { name: 'Quitar imagen' }));
+
+    expect(props.onUpdateSlide).toHaveBeenCalledWith(
+      's2',
+      expect.objectContaining({
+        layout: 'text-and-image',
+        imageUrl: undefined,
+        imageTransform: undefined,
+      }),
+    );
+    expect(screen.getByLabelText('URL de la imagen')).toHaveValue('');
+    expect(within(preview()).queryByRole('img')).toBeNull();
+    expect(within(preview()).getByText('Sin imagen')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Quitar imagen' })).toBeNull();
+  });
+
+  it('al hacer clic selecciona la imagen con borde y tiradores, y clic fuera la deselecciona', async () => {
+    const user = userEvent.setup();
+    const imageSlide: Slide = {
+      ...contentSlide,
+      layout: 'text-and-image',
+      imageUrl: 'https://example.com/foto.png',
+    };
+    renderEditor({ activeSlide: imageSlide });
+
+    const editable = preview().querySelector('[data-editable-image="true"]') as HTMLElement;
+    expect(editable.className).not.toContain('ring-blue-600');
+    expect(preview().querySelectorAll('[data-handle]')).toHaveLength(0);
+
+    await user.click(within(preview()).getByRole('img'));
+    expect(editable.className).toContain('ring-2');
+    expect(editable.className).toContain('ring-blue-600');
+    expect(preview().querySelectorAll('[data-handle]')).toHaveLength(4);
+
+    // Clic fuera de la imagen (sobre el título del slide en el lienzo vacío)
+    await user.click(within(preview()).getByRole('heading', { name: 'Intro' }));
+    expect(editable.className).not.toContain('ring-blue-600');
+    expect(preview().querySelectorAll('[data-handle]')).toHaveLength(0);
+  });
+
+  it('Delete o Backspace borra la imagen seleccionada, salvo cuando el foco está en un input', async () => {
+    const user = userEvent.setup();
+    const imageSlide: Slide = {
+      ...contentSlide,
+      layout: 'image-only',
+      imageUrl: 'https://example.com/foto.png',
+      imageTransform: { x: 8, y: 20, width: 84, height: 74 },
+    };
+    const props = renderEditor({ activeSlide: imageSlide });
+
+    await user.click(within(preview()).getByRole('img'));
+
+    // Si el foco está dentro de un input, Backspace no debe eliminar la imagen
+    const titleInput = screen.getByLabelText('Título');
+    titleInput.focus();
+    fireEvent.keyDown(titleInput, { key: 'Backspace' });
+    expect(props.onUpdateSlide).not.toHaveBeenCalled();
+
+    // Con foco fuera de inputs y la imagen seleccionada, Delete la elimina
+    (preview().querySelector('[data-editable-image="true"]') as HTMLElement).focus();
+    await user.keyboard('{Delete}');
+
+    expect(props.onUpdateSlide).toHaveBeenCalledWith(
+      's2',
+      expect.objectContaining({
+        imageUrl: undefined,
+        imageTransform: undefined,
+      }),
+    );
+    expect(within(preview()).queryByRole('img')).toBeNull();
+  });
+
+  it('pegar una imagen del portapapeles en "Solo texto" cambia a "Texto e imagen" y la carga', async () => {
+    const props = renderEditor({ activeSlide: contentSlide });
+    const file = new File(['clip-bytes'], 'captura.png', { type: 'image/png' });
+
+    const pasteEvent = new Event('paste', { bubbles: true, cancelable: true });
+    Object.defineProperty(pasteEvent, 'clipboardData', {
+      value: {
+        items: [{ kind: 'file', type: 'image/png', getAsFile: () => file }],
+        files: [file],
+      },
+    });
+    window.dispatchEvent(pasteEvent);
+
+    await waitFor(() => {
+      expect(props.onUpdateSlide).toHaveBeenCalledWith(
+        's2',
+        expect.objectContaining({
+          layout: 'text-and-image',
+          imageUrl: expect.stringMatching(/^data:image\/png;base64,/),
+          imageTransform: { x: 52, y: 20, width: 43, height: 74 },
+        }),
+      );
+    });
+    expect(within(preview()).getByRole('img')).toBeInTheDocument();
+  });
+
+  it('arrastrar y soltar un archivo sobre el lienzo carga la imagen y ajusta el diseño si estaba en "Solo texto"', async () => {
+    const props = renderEditor({ activeSlide: contentSlide });
+    const file = new File(['drop-bytes'], 'foto.jpg', { type: 'image/jpeg' });
+
+    fireEvent.dragOver(preview(), { dataTransfer: { types: ['Files'], files: [file] } });
+    expect(screen.getByText('Suelta la imagen aquí')).toBeInTheDocument();
+
+    fireEvent.drop(preview(), { dataTransfer: { files: [file] } });
+
+    await waitFor(() => {
+      expect(props.onUpdateSlide).toHaveBeenCalledWith(
+        's2',
+        expect.objectContaining({
+          layout: 'text-and-image',
+          imageUrl: expect.stringMatching(/^data:image\/jpeg;base64,/),
+          imageTransform: { x: 52, y: 20, width: 43, height: 74 },
+        }),
+      );
+    });
+    expect(screen.queryByText('Suelta la imagen aquí')).toBeNull();
+  });
+
+  it('las miniaturas del panel izquierdo reflejan imageTransform en modo solo lectura sin borde azul', () => {
+    const slideWithTransform: Slide = {
+      ...contentSlide,
+      layout: 'text-and-image',
+      imageUrl: 'https://example.com/foto.png',
+      imageTransform: { x: 55, y: 25, width: 38, height: 60 },
+    };
+    renderEditor({
+      project: makeProject({
+        id: 'p1',
+        name: 'Mi presentación',
+        slides: [titleSlide, slideWithTransform],
+      }),
+      slides: [titleSlide, slideWithTransform],
+      activeSlide: slideWithTransform,
+    });
+
+    const nav = screen.getByRole('navigation', { name: 'Diapositivas' });
+    const thumbImgBox = nav.querySelector('[data-editable-image="true"]') as HTMLElement;
+    expect(thumbImgBox.style.left).toBe('55%');
+    expect(thumbImgBox.style.top).toBe('25%');
+    expect(thumbImgBox.style.width).toBe('38%');
+    expect(thumbImgBox.style.height).toBe('60%');
+    expect(thumbImgBox.className).not.toContain('ring-blue-600');
+    expect(nav.querySelectorAll('[data-handle]')).toHaveLength(0);
   });
 });

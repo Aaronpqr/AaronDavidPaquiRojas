@@ -77,4 +77,35 @@ describe('PresentationView', () => {
 
     expect(onNext).not.toHaveBeenCalled();
   });
+
+  it('refleja imageTransform exacto en modo solo lectura sin controles de edición', () => {
+    const imageSlide: Slide = {
+      ...slide,
+      layout: 'image-only',
+      imageUrl: 'https://example.com/foto.png',
+      imageTransform: { x: 12, y: 24, width: 70, height: 60 },
+    };
+
+    const { container } = render(
+      <PresentationView
+        slide={imageSlide}
+        index={1}
+        total={5}
+        author="Ana"
+        topic="React"
+        date="05/11/2026"
+        onNext={jest.fn()}
+        onPrev={jest.fn()}
+        onExit={jest.fn()}
+      />,
+    );
+
+    const box = container.querySelector('[data-editable-image="true"]') as HTMLElement;
+    expect(box.style.left).toBe('12%');
+    expect(box.style.top).toBe('24%');
+    expect(box.style.width).toBe('70%');
+    expect(box.style.height).toBe('60%');
+    expect(box.className).not.toContain('ring-blue-600');
+    expect(container.querySelectorAll('[data-handle]')).toHaveLength(0);
+  });
 });

@@ -27,6 +27,26 @@ describe('LayoutImageOnly', () => {
     expect(screen.queryByRole('img')).toBeNull();
     expect(screen.getByText('Sin imagen')).toBeInTheDocument();
   });
+
+  it('aplica imageTransform personalizado o el predeterminado del diseño', () => {
+    const { container, rerender } = render(<LayoutImageOnly title="Diagrama" imageUrl={URL} />);
+    const defaultBox = container.querySelector('[data-editable-image="true"]') as HTMLElement;
+    expect(defaultBox.style.left).toBe('8%');
+    expect(defaultBox.style.width).toBe('84%');
+
+    rerender(
+      <LayoutImageOnly
+        title="Diagrama"
+        imageUrl={URL}
+        imageTransform={{ x: 15, y: 25, width: 60, height: 50 }}
+      />,
+    );
+    const customBox = container.querySelector('[data-editable-image="true"]') as HTMLElement;
+    expect(customBox.style.left).toBe('15%');
+    expect(customBox.style.top).toBe('25%');
+    expect(customBox.style.width).toBe('60%');
+    expect(customBox.style.height).toBe('50%');
+  });
 });
 
 describe('LayoutTextAndImage', () => {
@@ -40,5 +60,14 @@ describe('LayoutTextAndImage', () => {
   it('muestra un marcador si no hay imagen', () => {
     render(<LayoutTextAndImage title="Mixto" text="Descripción" />);
     expect(screen.getByText('Sin imagen')).toBeInTheDocument();
+  });
+
+  it('posiciona la imagen a la derecha por defecto sin tapar el texto', () => {
+    const { container } = render(
+      <LayoutTextAndImage title="Mixto" text="Descripción" imageUrl={URL} />,
+    );
+    const box = container.querySelector('[data-editable-image="true"]') as HTMLElement;
+    expect(Number.parseFloat(box.style.left)).toBeGreaterThanOrEqual(50);
+    expect(box.style.width).toBe('43%');
   });
 });

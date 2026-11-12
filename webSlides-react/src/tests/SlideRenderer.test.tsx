@@ -77,4 +77,25 @@ describe('SlideRenderer', () => {
 
     expect(screen.getByText('9')).toBeInTheDocument();
   });
+
+  it('en modo solo lectura aplica imageTransform exacto sin bordes ni tiradores', () => {
+    const { container } = render(
+      <SlideRenderer
+        slide={content({
+          layout: 'text-and-image',
+          imageUrl: 'https://x.com/a.png',
+          imageTransform: { x: 45, y: 22, width: 48, height: 65 },
+        })}
+        {...meta}
+      />,
+    );
+
+    const box = container.querySelector('[data-editable-image="true"]') as HTMLElement;
+    expect(box.style.left).toBe('45%');
+    expect(box.style.top).toBe('22%');
+    expect(box.style.width).toBe('48%');
+    expect(box.style.height).toBe('65%');
+    expect(box.className).not.toContain('ring-blue-600');
+    expect(container.querySelectorAll('[data-handle]')).toHaveLength(0);
+  });
 });

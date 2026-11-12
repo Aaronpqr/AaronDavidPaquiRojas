@@ -86,7 +86,17 @@ describe('IndexedDbProjectRepository', () => {
             title: 'Slide 2',
             text: 'Cuerpo',
             imageUrl: 'https://example.com/img.png',
+            imageTransform: { x: 52, y: 20, width: 43, height: 74 },
             order: 1,
+          },
+          {
+            id: 's3',
+            type: 'content',
+            layout: 'image-only',
+            title: 'Slide 3 legado',
+            text: '',
+            imageUrl: 'https://example.com/legacy.png',
+            order: 2,
           },
         ],
       });
@@ -94,8 +104,10 @@ describe('IndexedDbProjectRepository', () => {
       await repo.save(project);
       const found = await repo.getById('p2');
 
-      expect(found?.slides).toHaveLength(2);
+      expect(found?.slides).toHaveLength(3);
       expect(found?.slides[1].layout).toBe('text-and-image');
+      expect(found?.slides[1].imageTransform).toEqual({ x: 52, y: 20, width: 43, height: 74 });
+      expect(found?.slides[2].imageTransform).toBeUndefined();
     });
 
     it('getAll devuelve todos los proyectos, el más reciente primero', async () => {

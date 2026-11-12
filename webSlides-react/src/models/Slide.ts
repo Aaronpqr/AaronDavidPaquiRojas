@@ -10,6 +10,16 @@ export type SlideType = 'title' | 'content';
  */
 export type SlideLayout = 'text-only' | 'image-only' | 'text-and-image';
 
+/**
+ * Posición y tamaño de la imagen en porcentajes (0–100) respecto al contenedor del slide.
+ */
+export interface ImageTransform {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 export interface Slide {
   id: string;
   type: SlideType;
@@ -20,9 +30,13 @@ export interface Slide {
   text: string;
   /** URL de la imagen (layouts 'image-only' y 'text-and-image'). */
   imageUrl?: string;
+  /** Transformación espacial opcional de la imagen en porcentajes (0–100). */
+  imageTransform?: ImageTransform;
   /** Posición del slide dentro del proyecto (base 0). */
   order: number;
 }
 
 /** Campos de un slide que el usuario puede editar. */
-export type SlideChanges = Partial<Pick<Slide, 'title' | 'text' | 'layout' | 'imageUrl'>>;
+export type SlideChanges = Partial<
+  Pick<Slide, 'title' | 'text' | 'layout' | 'imageUrl' | 'imageTransform'>
+>;

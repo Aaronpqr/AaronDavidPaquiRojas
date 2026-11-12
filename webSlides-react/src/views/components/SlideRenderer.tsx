@@ -1,11 +1,12 @@
 import type { CSSProperties } from 'react';
 import type { Slide } from '../../models/Slide';
+import type { SlideImageInteractionProps } from './EditableImage';
 import { HeaderFooter } from './HeaderFooter';
 import { LayoutImageOnly } from './LayoutImageOnly';
 import { LayoutTextAndImage } from './LayoutTextAndImage';
 import { LayoutTextOnly } from './LayoutTextOnly';
 
-interface SlideRendererProps {
+interface SlideRendererProps extends SlideImageInteractionProps {
   slide: Slide;
   author: string;
   topic: string;
@@ -17,13 +18,26 @@ interface SlideRendererProps {
 
 const containerStyle = { containerType: 'inline-size' } as CSSProperties;
 
-function renderLayout(slide: Slide) {
+function renderLayout(slide: Slide, interaction: SlideImageInteractionProps) {
   switch (slide.layout ?? 'text-only') {
     case 'image-only':
-      return <LayoutImageOnly title={slide.title} imageUrl={slide.imageUrl} />;
+      return (
+        <LayoutImageOnly
+          title={slide.title}
+          imageUrl={slide.imageUrl}
+          imageTransform={slide.imageTransform}
+          {...interaction}
+        />
+      );
     case 'text-and-image':
       return (
-        <LayoutTextAndImage title={slide.title} text={slide.text} imageUrl={slide.imageUrl} />
+        <LayoutTextAndImage
+          title={slide.title}
+          text={slide.text}
+          imageUrl={slide.imageUrl}
+          imageTransform={slide.imageTransform}
+          {...interaction}
+        />
       );
     default:
       return <LayoutTextOnly title={slide.title} text={slide.text} />;
@@ -35,7 +49,19 @@ function renderLayout(slide: Slide) {
  * query" (cqw) para que todo escale con el ancho del slide, tanto en la vista
  * previa del editor como en miniaturas y en pantalla completa.
  */
-export function SlideRenderer({ slide, author, topic, date, slideNumber }: SlideRendererProps) {
+export function SlideRenderer({
+  slide,
+  author,
+  topic,
+  date,
+  slideNumber,
+  interactive,
+  selectedImage,
+  onSelectImage,
+  onImageClick,
+  onImageTransformChange,
+  onImageTransformCommit,
+}: SlideRendererProps) {
   if (slide.type === 'title') {
     return (
       <div
@@ -63,7 +89,14 @@ export function SlideRenderer({ slide, author, topic, date, slideNumber }: Slide
         date={date}
         slideNumber={slideNumber ?? slide.order + 1}
       >
-        {renderLayout(slide)}
+        {renderLayout(slide, {
+          interactive,
+          selectedImage,
+          onSelectImage,
+          onImageClick,
+          onImageTransformChange,
+          onImageTransformCommit,
+        })}
       </HeaderFooter>
     </div>
   );
