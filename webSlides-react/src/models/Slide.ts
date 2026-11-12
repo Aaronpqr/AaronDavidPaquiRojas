@@ -22,9 +22,7 @@ export interface Slide {
   imageUrl?: string;
   /** Posición del slide dentro del proyecto (base 0). */
   order: number;
-
-  
 }
+
 /** Campos de un slide que el usuario puede editar. */
 export type SlideChanges = Partial<Pick<Slide, 'title' | 'text' | 'layout' | 'imageUrl'>>;
-

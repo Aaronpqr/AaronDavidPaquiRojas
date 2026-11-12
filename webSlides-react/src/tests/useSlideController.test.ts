@@ -29,6 +29,10 @@ async function setup() {
   return { repo, ...hook };
 }
 
+function makeSlideStub(): Slide {
+  return { id: 'x', type: 'content', title: 'x', text: '', order: 0 };
+}
+
 describe('useSlideController', () => {
   it('sin proyecto no expone slides ni slide activo', () => {
     const { result } = renderHook(() =>
@@ -197,7 +201,3 @@ describe('useSlideController', () => {
     expect(result.current.slideCtl.isPresentation).toBe(false);
   });
 });
-
-function makeSlideStub(): Slide {
-  return { id: 'x', type: 'content', title: 'x', text: '', order: 0 };
-}

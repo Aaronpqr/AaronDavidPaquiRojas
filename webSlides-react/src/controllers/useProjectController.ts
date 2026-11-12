@@ -4,9 +4,9 @@ import type { Project } from '../models/Project';
 import { generateId } from '../utils/generateId';
 
 export interface NewProjectInput {
-  name: string;
-  author: string;
-  topic: string;
+  name?: string;
+  author?: string;
+  topic?: string;
 }
 
 function toMessage(err: unknown): string {
@@ -52,7 +52,10 @@ export function useProjectController(repository: IProjectRepository) {
   }, [repository]);
 
   const createProject = useCallback(
-    async ({ name, author, topic }: NewProjectInput): Promise<Project | null> => {
+    async (input: NewProjectInput = {}): Promise<Project | null> => {
+      const name = input.name?.trim() || 'Presentación sin título';
+      const author = input.author?.trim() ?? '';
+      const topic = input.topic?.trim() ?? '';
       const now = new Date().toISOString();
       const project: Project = {
         id: generateId(),
@@ -60,9 +63,7 @@ export function useProjectController(repository: IProjectRepository) {
         author,
         topic,
         // El primer slide siempre es la Portada
-        slides: [
-          { id: generateId(), type: 'title', title: name, text: topic, order: 0 },
-        ],
+        slides: [{ id: generateId(), type: 'title', title: name, text: topic, order: 0 }],
         createdAt: now,
         updatedAt: now,
       };

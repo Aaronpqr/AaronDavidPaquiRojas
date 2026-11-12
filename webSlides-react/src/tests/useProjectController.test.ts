@@ -52,6 +52,21 @@ describe('useProjectController', () => {
     expect(await repo.getById(project.id)).not.toBeNull();
   });
 
+  it('createProject sin datos crea una presentación sin título', async () => {
+    const { result } = await setup();
+
+    await act(async () => {
+      await result.current.createProject();
+    });
+
+    const project = result.current.projects[0];
+    expect(project.name).toBe('Presentación sin título');
+    expect(project.author).toBe('');
+    expect(project.topic).toBe('');
+    expect(project.slides[0].type).toBe('title');
+    expect(project.slides[0].title).toBe('Presentación sin título');
+  });
+
   it('deleteProject elimina el proyecto del estado y del repositorio', async () => {
     const { result, repo } = await setup([makeProject({ id: 'x' })]);
 

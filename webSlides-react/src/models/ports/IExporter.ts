@@ -1,4 +1,4 @@
-import { Project } from '../Project';
+import type { Project } from '../Project';
 
 /**
  * Puerto de exportación. Cada formato (HTML, PDF, PPTX, ODP)

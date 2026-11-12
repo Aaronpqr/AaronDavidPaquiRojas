@@ -11,3 +11,6 @@ export interface Project {
   createdAt: string;
   updatedAt: string;
 }
+
+/** Datos editables del proyecto desde el editor. */
+export type ProjectMeta = Partial<Pick<Project, 'name' | 'author' | 'topic'>>;
